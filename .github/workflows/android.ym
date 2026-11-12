@@ -1,0 +1,36 @@
+
+name: Build BlackOptimizer APK
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - 'BlackOptimizerMobile-Android-Project-v1.2.zip'
+      - '.github/workflows/android.yml'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.11.1'
+
+      - name: Extract project
+        run: unzip -q BlackOptimizerMobile-Android-Project-v1.2.zip -d "$RUNNER_TEMP/blackoptimizer"
+
+      - name: Build APK
+        working-directory: ${{ runner.temp }}/blackoptimizer/BlackOptimizerMobile
+        run: gradle --no-daemon assembleDebug
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: BlackOptimizer-debug-APK
+          path: ${{ runner.temp }}/blackoptimizer/BlackOptimizerMobile/app/build/outputs/apk/debug/app-debug.apk
